@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+    <!-- Dark TV Background -->
+    <path
+        android:fillColor="#0A0D14"
+        android:pathData="M0,0h320v180h-320z" />
+    <!-- Red Accent Corner Strip -->
+    <path
+        android:fillColor="#E50914"
+        android:pathData="M0,0h16v180h-16z" />
+    <!-- Amber Gold Play Icon Badge -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M140,65 L190,90 L140,115 Z" />
+</vector>

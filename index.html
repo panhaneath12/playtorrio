@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#08090D" />
+    <title>PlayTorrio V3 — Stream Movies, TV Shows, Anime & Live TV</title>
+    
+    <!-- Android 9 (Chromium 69-74) Core Polyfills & Global Exception Interceptor -->
+    <script>
+      (function() {
+        // 1. Android 9 Polyfill for queueMicrotask (Added in Chrome 71)
+        if (typeof window.queueMicrotask !== 'function') {
+          window.queueMicrotask = function(cb) {
+            Promise.resolve().then(cb).catch(function(err) {
+              setTimeout(function() { throw err; }, 0);
+            });
+          };
+        }
+
+        // 2. Android 9 Polyfill for Promise.allSettled (Added in Chrome 76)
+        if (typeof Promise.allSettled !== 'function') {
+          Promise.allSettled = function(promises) {
+            return Promise.all(
+              Array.from(promises).map(function(p) {
+                return Promise.resolve(p).then(
+                  function(value) { return { status: 'fulfilled', value: value }; },
+                  function(reason) { return { status: 'rejected', reason: reason }; }
+                );
+              })
+            );
+          };
+        }
+
+        // 3. Android 9 Polyfill for globalThis (Added in Chrome 71)
+        if (typeof globalThis === 'undefined') {
+          window.globalThis = window;
+        }
+
+        // 4. Android 9 Polyfill for String.prototype.replaceAll (Added in Chrome 85)
+        if (!String.prototype.replaceAll) {
+          String.prototype.replaceAll = function(str, newStr) {
+            if (Object.prototype.toString.call(str).toLowerCase() === '[object regexp]') {
+              return this.replace(str, newStr);
+            }
+            return this.replace(new RegExp(str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), newStr);
+          };
+        }
+
+        // 5. Global Error & Rejection Interceptor
+        window.__playtorrioErrors = [];
+        
+        window.onerror = function(msg, url, line, col, error) {
+          var errStr = msg + ' at ' + (url || 'script') + ':' + line;
+          console.error('[PlayTorrio Global Error]', errStr);
+          window.__playtorrioErrors.push(errStr);
+          showFatalError(errStr);
+        };
+
+        window.onunhandledrejection = function(e) {
+          var reason = e && e.reason ? (e.reason.message || String(e.reason)) : 'Unhandled Async Promise Rejection';
+          console.error('[PlayTorrio Rejection]', reason);
+          window.__playtorrioErrors.push(reason);
+          showFatalError('Async Failure: ' + reason);
+        };
+
+        function showFatalError(text) {
+          var errBox = document.getElementById('pt-fatal-error');
+          var errDetail = document.getElementById('pt-error-detail');
+          if (errBox && errDetail) {
+            errDetail.textContent = text;
+            errBox.style.display = 'flex';
+          }
+        }
+      })();
+    </script>
+
+    <!-- PlayTorrio V3 Global AdShield & Anti-Popup Interceptor -->
+    <script>
+      (function() {
+        const _origOpen = window.open;
+        window.open = function(url, target, features) {
+          if (!url) return null;
+          try {
+            const str = String(url).toLowerCase();
+            if (str.startsWith('stremio:') || str.startsWith('vlc:') || str.startsWith('magnet:')) {
+              return _origOpen.call(window, url, target, features);
+            }
+          } catch(e) {}
+          console.warn('[PlayTorrio AdShield] Neutralized popup attempt to:', url);
+          return null;
+        };
+
+        window.addEventListener('message', function(event) {
+          if (event && event.data && typeof event.data === 'string') {
+            const d = event.data.toLowerCase();
+            if (d.includes('trip.com') || d.includes('onclick') || d.includes('popup') || d.includes('redirect')) {
+              event.stopImmediatePropagation();
+            }
+          }
+        }, true);
+      })();
+    </script>
+
+    <style>
+      /* Zero-latency Inline Styles to guarantee immediate rendering on Wanbo TV */
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #08090D;
+        color: #FFFFFF;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        overflow-x: hidden;
+      }
+      .pt-splash-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        width: 100vw;
+        background: radial-gradient(circle at center, #171924 0%, #08090D 75%);
+        text-align: center;
+        user-select: none;
+      }
+      .pt-logo-title {
+        font-size: 2.8rem;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+        color: #FFFFFF;
+        text-shadow: 0 4px 24px rgba(229, 9, 20, 0.4);
+      }
+      .pt-logo-accent {
+        color: #E50914;
+      }
+      .pt-subtitle {
+        font-size: 0.95rem;
+        color: #9CA3AF;
+        margin-bottom: 2.5rem;
+        letter-spacing: 0.05em;
+      }
+      .pt-progress-track {
+        width: 240px;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 999px;
+        overflow: hidden;
+        position: relative;
+        margin-bottom: 1.25rem;
+      }
+      .pt-progress-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 40%;
+        background: linear-gradient(90deg, #E50914, #FFAA00);
+        border-radius: 999px;
+        animation: pt-pulse-anim 1.5s infinite ease-in-out;
+      }
+      @keyframes pt-pulse-anim {
+        0% { left: -40%; width: 40%; }
+        50% { width: 60%; }
+        100% { left: 100%; width: 40%; }
+      }
+      .pt-status-text {
+        font-size: 0.85rem;
+        color: #6B7280;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+      }
+      .pt-device-tag {
+        margin-top: 1.5rem;
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.75rem;
+        color: #9CA3AF;
+      }
+      /* Fatal Error Modal */
+      #pt-fatal-error {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        background: #08090D;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
+      .pt-error-card {
+        max-width: 600px;
+        width: 100%;
+        background: #13151F;
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        border-radius: 1.25rem;
+        padding: 2rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+      }
+      .pt-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 700;
+        font-size: 0.9rem;
+        border: none;
+        cursor: pointer;
+        outline: none;
+      }
+      .pt-btn-primary {
+        background: #E50914;
+        color: #FFF;
+      }
+      .pt-btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: #E5E7EB;
+        margin-left: 0.75rem;
+      }
+      .pt-btn:focus {
+        box-shadow: 0 0 0 3px #FFF;
+      }
+    </style>
+  </head>
+  <body class="bg-[#08090D] text-white font-sans antialiased selection:bg-[#E50914] selection:text-white">
+    <!-- 1. Root React Mount Point (Contains Pre-Rendered Splash Screen) -->
+    <div id="root">
+      <div class="pt-splash-container">
+        <div class="pt-logo-title">
+          PLAY<span class="pt-logo-accent">TORRIO</span> V3
+        </div>
+        <div class="pt-subtitle">
+          Movies &bull; TV Series &bull; Anime &bull; Worldwide Live TV
+        </div>
+        <div class="pt-progress-track">
+          <div class="pt-progress-bar"></div>
+        </div>
+        <div class="pt-status-text">
+          Loading High-Speed Streaming Engine...
+        </div>
+        <div class="pt-device-tag">
+          Web Edition &bull; 4K Fast Streaming &bull; Ad-Free
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Pre-React Fatal Error Interceptor Screen -->
+    <div id="pt-fatal-error">
+      <div class="pt-error-card">
+        <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+          <div style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 0.75rem; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #EF4444; font-size: 1.5rem; font-weight: bold; margin-right: 1rem;">
+            !
+          </div>
+          <div>
+            <h2 style="margin: 0; font-size: 1.3rem; color: #FFF;">PlayTorrio V3 Startup Interceptor</h2>
+            <p style="margin: 0; font-size: 0.8rem; color: #9CA3AF;">An unexpected exception was safely intercepted.</p>
+          </div>
+        </div>
+        <div id="pt-error-detail" style="background: #000; padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.1); font-family: monospace; font-size: 0.8rem; color: #F87171; word-break: break-all; margin-bottom: 1.5rem; max-height: 150px; overflow-y: auto;">
+          Evaluating script bundle...
+        </div>
+        <div style="display: flex; justify-content: flex-end;">
+          <button class="pt-btn pt-btn-secondary" onclick="try{localStorage.clear();sessionStorage.clear();}catch(e){};window.location.reload();">
+            Reset Cache
+          </button>
+          <button class="pt-btn pt-btn-primary" onclick="window.location.reload();">
+            Reload App
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. React Application Bundle Entry -->
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
