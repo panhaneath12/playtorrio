@@ -102,6 +102,7 @@ export const MultiServerPlayer: React.FC<MultiServerPlayerProps> = ({
   const [autoFailoverEnabled, setAutoFailoverEnabled] = useState<boolean>(true);
   const [failoverCountdown, setFailoverCountdown] = useState<number | null>(null);
   const [pendingNextServer, setPendingNextServer] = useState<StreamingServer | null>(null);
+  const [isUkHelpOpen, setIsUkHelpOpen] = useState<boolean>(false);
 
   const failedServerIdsRef = useRef<Set<string>>(new Set());
   const watchdogTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -477,8 +478,16 @@ export const MultiServerPlayer: React.FC<MultiServerPlayerProps> = ({
           </div>
         </div>
 
-        {/* Top Controls: Auto-Switch, Reload, Close (Fullscreen Button Removed) */}
+        {/* Top Controls: Auto-Switch, UK Help, Reload, Close (Fullscreen Button Removed) */}
         <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
+          <button
+            onClick={() => setIsUkHelpOpen(true)}
+            className="flex items-center space-x-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 text-xs sm:text-sm font-semibold border border-indigo-500/40 transition shadow-sm"
+            title="UK ISP Streaming Fix Guide"
+          >
+            <span>🇬🇧 UK / Block Fix</span>
+          </button>
+
           <button
             onClick={() => {
               setAutoFailoverEnabled(prev => !prev);
@@ -668,6 +677,27 @@ export const MultiServerPlayer: React.FC<MultiServerPlayerProps> = ({
           </div>
         )}
 
+        {/* UK / Regional ISP Block Alert Banner (shown when servers fail) */}
+        {failedServerIds.size >= 2 && (
+          <div className="p-4 bg-gradient-to-r from-indigo-950/80 via-slate-900 to-purple-950/80 border border-indigo-500/40 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs sm:text-sm shadow-xl backdrop-blur-md animate-fadeIn">
+            <div className="flex items-center space-x-3">
+              <span className="text-2xl shrink-0">🇬🇧</span>
+              <div>
+                <span className="font-bold text-white text-sm">Streaming not loading in the UK?</span>
+                <p className="text-indigo-200/90 text-xs mt-0.5">
+                  UK ISPs (Virgin Media, BT, Sky, EE) actively block streaming servers by default. You can bypass this in 30 seconds!
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsUkHelpOpen(true)}
+              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition shrink-0 hover:scale-105 active:scale-95"
+            >
+              See 30-Sec Fix →
+            </button>
+          </div>
+        )}
+
         {/* 4. Streaming Servers Grid */}
         <div className="bg-[#12131A] p-4 sm:p-5 rounded-2xl border border-white/10 space-y-3 shadow-md">
           <div className="flex items-center justify-between">
@@ -676,13 +706,22 @@ export const MultiServerPlayer: React.FC<MultiServerPlayerProps> = ({
               <span>Streaming Servers &amp; Mirrors</span>
               <span className="text-xs font-normal text-gray-400 hidden sm:inline">({STREAMING_SERVERS.length} Fast Embed Servers)</span>
             </div>
-            <button
-              onClick={() => handleNextServerFallback('Manual switch')}
-              className="text-xs text-amber-400 hover:text-amber-300 flex items-center space-x-1 font-semibold transition"
-            >
-              <RefreshIcon size={13} />
-              <span>Next Server (N)</span>
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setIsUkHelpOpen(true)}
+                className="text-xs text-indigo-300 hover:text-indigo-200 bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-500/40 px-2.5 py-1 rounded-lg font-medium transition flex items-center space-x-1"
+                title="Fix streaming blocks for UK & regional ISPs"
+              >
+                <span>🇬🇧 In UK or blocked?</span>
+              </button>
+              <button
+                onClick={() => handleNextServerFallback('Manual switch')}
+                className="text-xs text-amber-400 hover:text-amber-300 flex items-center space-x-1 font-semibold transition"
+              >
+                <RefreshIcon size={13} />
+                <span>Next Server (N)</span>
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
@@ -907,6 +946,95 @@ export const MultiServerPlayer: React.FC<MultiServerPlayerProps> = ({
         </div>
 
       </main>
+
+      {/* 🇬🇧 UK & Regional Block Troubleshooting Modal */}
+      {isUkHelpOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 animate-fadeIn">
+          <div className="bg-[#131522] border border-white/15 rounded-3xl max-w-2xl w-full p-5 sm:p-7 space-y-5 shadow-2xl overflow-y-auto max-h-[92vh]">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center space-x-3">
+                <span className="text-3xl">🇬🇧</span>
+                <div>
+                  <h2 className="text-lg sm:text-xl font-black text-white">Why Streaming Fails in the UK & How to Fix It</h2>
+                  <p className="text-xs sm:text-sm text-gray-400">Step-by-step 30-second fixes for Virgin Media, BT, Sky, EE & TalkTalk</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsUkHelpOpen(false)}
+                className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-gray-300 transition"
+              >
+                <CloseIcon size={18} />
+              </button>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs sm:text-sm leading-relaxed">
+              <strong>Why none of the servers load:</strong> In the UK, High Court copyright injunctions mandate all major home broadband providers (Virgin Media, Sky, BT, EE, TalkTalk) to block free streaming embeds & third-party CDNs by default. In an embedded player, this causes infinite spinning or connection refused errors.
+            </div>
+
+            <div className="space-y-3.5">
+              {/* Fix 1: Secure DNS */}
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                <div className="flex items-center space-x-2">
+                  <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 font-bold text-xs">Method 1 (Fastest & Free - 30s)</span>
+                  <h3 className="text-sm sm:text-base font-bold text-white">Turn on Secure DNS in Browser</h3>
+                </div>
+                <p className="text-xs text-gray-300 leading-relaxed">
+                  No app download needed. This forces your browser to bypass your UK ISP's blocked DNS resolvers:
+                </p>
+                <ol className="list-decimal list-inside text-xs text-gray-300 space-y-1.5 bg-black/30 p-3 rounded-xl border border-white/5 font-mono text-[11px] sm:text-xs">
+                  <li>In Chrome, Brave, or Edge, click <strong>Settings</strong>.</li>
+                  <li>Click <strong>Privacy and security</strong> &rarr; <strong>Security</strong>.</li>
+                  <li>Scroll to <strong>Use secure DNS</strong> and toggle it <strong>ON</strong>.</li>
+                  <li>Select <strong>With: Cloudflare (1.1.1.1)</strong> or <strong>Google (Public DNS)</strong>.</li>
+                  <li>Refresh this page and choose any server. It will load immediately!</li>
+                </ol>
+              </div>
+
+              {/* Fix 2: VPN */}
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                <div className="flex items-center space-x-2">
+                  <span className="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-400 font-bold text-xs">Method 2 (100% Guaranteed)</span>
+                  <h3 className="text-sm sm:text-base font-bold text-white">Use Cloudflare WARP or a Free VPN</h3>
+                </div>
+                <p className="text-xs text-gray-300 leading-relaxed">
+                  A VPN or WARP completely encrypts your traffic so your UK ISP cannot see or block the video stream:
+                </p>
+                <ul className="list-disc list-inside text-xs text-gray-300 space-y-1 bg-black/30 p-3 rounded-xl border border-white/5">
+                  <li><strong>Cloudflare 1.1.1.1 with WARP:</strong> Official free 1-click app from Cloudflare (visit <a href="https://1.1.1.1" target="_blank" rel="noopener noreferrer" className="text-amber-400 underline font-semibold">1.1.1.1</a>).</li>
+                  <li><strong>ProtonVPN Free:</strong> Completely free unlimited bandwidth VPN (visit <a href="https://protonvpn.com/free-vpn" target="_blank" rel="noopener noreferrer" className="text-amber-400 underline font-semibold">protonvpn.com</a>).</li>
+                  <li>Connect to any location and refresh the page.</li>
+                </ul>
+              </div>
+
+              {/* Fix 3: Turn off ISP parental controls */}
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                <div className="flex items-center space-x-2">
+                  <span className="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-400 font-bold text-xs">Method 3 (Router Setting)</span>
+                  <h3 className="text-sm sm:text-base font-bold text-white">Turn Off ISP Parental Shield / Web Safe</h3>
+                </div>
+                <p className="text-xs text-gray-300 leading-relaxed">
+                  UK broadband providers enable automatic filters out of the box that classify streaming CDNs as restricted:
+                </p>
+                <ul className="list-disc list-inside text-xs text-gray-300 space-y-1 bg-black/30 p-3 rounded-xl border border-white/5">
+                  <li><strong>Virgin Media:</strong> Log into Virgin Media account &rarr; My Apps &rarr; Web Safe &rarr; Turn OFF "Child Safe".</li>
+                  <li><strong>Sky:</strong> Log into My Sky &rarr; Broadband Shield &rarr; Set to "Off".</li>
+                  <li><strong>BT:</strong> Log into My BT &rarr; Broadband &rarr; Parental Controls &rarr; Turn OFF.</li>
+                  <li><strong>EE:</strong> Log into My EE &rarr; Manage Device &rarr; Content Lock &rarr; Turn OFF.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => setIsUkHelpOpen(false)}
+                className="px-5 py-2.5 rounded-xl bg-brand-accent hover:bg-brand-accent-hover text-white font-bold text-xs sm:text-sm shadow-cinema-glow transition hover:scale-105 active:scale-95"
+              >
+                Back to Player
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

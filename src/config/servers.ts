@@ -47,8 +47,28 @@ export const STREAMING_SERVERS: StreamingServer[] = [
     getSeriesUrl: (id: string, s: number, e: number) => `https://vidfast.pro/tv/${id}/${s}/${e}`,
   },
   {
+    id: 'embed_su',
+    name: 'Server 4 (Embed.su Global)',
+    badge: 'Multi-Source',
+    quality: '1080p Ultra',
+    description: 'Resilient global streaming source with multi-language audio and captions',
+    isAsian: true,
+    getMovieUrl: (id: string) => `https://embed.su/embed/movie/${id}`,
+    getSeriesUrl: (id: string, s: number, e: number) => `https://embed.su/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    id: 'vidsrc_cc',
+    name: 'Server 5 (VidSrc CC v2)',
+    badge: 'Fast Mirror',
+    quality: '1080p',
+    description: 'Alternative VidSrc v2 cloud stream with high uptime',
+    isAsian: true,
+    getMovieUrl: (id: string) => `https://vidsrc.cc/v2/embed/movie/${id}`,
+    getSeriesUrl: (id: string, s: number, e: number) => `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
+  },
+  {
     id: 'vidsrc_me',
-    name: 'Server 4 (VidSrc Classic API)',
+    name: 'Server 6 (VidSrc Classic API)',
     badge: 'Asian Archives',
     quality: '1080p',
     description: 'Official multi-source TMDB resolver with complete Korean, Chinese, and Asian drama episodes',
@@ -58,7 +78,7 @@ export const STREAMING_SERVERS: StreamingServer[] = [
   },
   {
     id: 'vidsrc_to',
-    name: 'Server 5 (VidSrc Ultra)',
+    name: 'Server 7 (VidSrc Ultra)',
     badge: '1080p Ultra',
     quality: '1080p',
     description: 'High-speed global cloud CDN with auto-captions and multi-source failover',
@@ -68,7 +88,7 @@ export const STREAMING_SERVERS: StreamingServer[] = [
   },
   {
     id: 'vidsrc_pm',
-    name: 'Server 6 (VidSrc Prime)',
+    name: 'Server 8 (VidSrc Prime)',
     badge: 'Fast Mirror',
     quality: '1080p HD',
     description: 'Direct high-availability mirror with English and international multi-audio',
@@ -78,7 +98,7 @@ export const STREAMING_SERVERS: StreamingServer[] = [
   },
   {
     id: 'autoembed_me',
-    name: 'Server 7 (AutoEmbed Global)',
+    name: 'Server 9 (AutoEmbed Global)',
     badge: 'Auto Captions',
     quality: '1080p',
     description: 'Smart multi-language audio selector and synchronized Asian language subtitles',
@@ -88,7 +108,7 @@ export const STREAMING_SERVERS: StreamingServer[] = [
   },
   {
     id: 'twoembed_skin',
-    name: 'Server 8 (2Embed Pro)',
+    name: 'Server 10 (2Embed Pro)',
     badge: 'Global CDN',
     quality: '1080p',
     description: 'Resilient multi-mirror streaming gateway with low latency',
@@ -98,7 +118,7 @@ export const STREAMING_SERVERS: StreamingServer[] = [
   },
   {
     id: 'embed123',
-    name: 'Server 9 (123Embed Cloud)',
+    name: 'Server 11 (123Embed Cloud)',
     badge: 'Fast Cloud',
     quality: '1080p',
     description: 'Optimized HTML5 video player with adaptive buffer management',
@@ -107,7 +127,7 @@ export const STREAMING_SERVERS: StreamingServer[] = [
   },
   {
     id: 'multiembed',
-    name: 'Server 10 (MultiEmbed & Bollywood)',
+    name: 'Server 12 (MultiEmbed & Bollywood)',
     badge: 'Multi-Audio',
     quality: '720p/1080p',
     description: 'Specialized for Bollywood, South Indian Cinema, Asian dramas, and international dubs',
@@ -118,7 +138,7 @@ export const STREAMING_SERVERS: StreamingServer[] = [
   },
   {
     id: 'vidsrc_sh',
-    name: 'Server 11 (VidSrc SH Dual-Audio)',
+    name: 'Server 13 (VidSrc SH Dual-Audio)',
     badge: 'Dual Audio',
     quality: '1080p',
     description: 'Dual-engine TMDB resolver with Japanese Anime & English Sub/Dub tracks',
@@ -134,7 +154,7 @@ export const STREAMING_SERVERS: StreamingServer[] = [
   },
   {
     id: 'webtorrent',
-    name: 'Server 12 (WebTorrent P2P)',
+    name: 'Server 14 (WebTorrent P2P)',
     badge: 'WebRTC P2P',
     quality: 'HD Stream',
     description: 'Native in-browser WebTorrent streaming engine (No iFrame blocking)',
